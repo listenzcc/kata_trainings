@@ -57,7 +57,7 @@ def is_valid(grid, clues, debug=False):
         print('-'*20, 'is_valid', '-'*20)
         print(shift)
         for j, e in enumerate(clues[1]):
-            print('%3d' % j, '%30s' % str(e), grid[j])
+            print('%3d' % j, '%8s' % str(e), grid[j])
     return not max(len(e) for e in grid) > len(grid)
 
 
@@ -88,20 +88,5 @@ print(is_good_ans(ans, clues))
 shift = [0, 0, 0, 0, 2, 2]
 
 print(is_valid(mkgrid(shift, clues), clues))
-
-solve(clues)
-
-clues = (
-    (
-        (4, 3), (1, 6, 2), (1, 2, 2, 1, 1), (1, 2, 2, 1, 2), (3, 2, 3),
-        (2, 1, 3), (1, 1, 1), (2, 1, 4, 1), (1, 1, 1, 1, 2), (1, 4, 2),
-        (1, 1, 2, 1), (2, 7, 1), (2, 1, 1, 2), (1, 2, 1), (3, 3)
-    ), (
-        (3, 2), (1, 1, 1, 1), (1, 2, 1, 2), (1, 2, 1, 1, 3), (1, 1, 2, 1),
-        (2, 3, 1, 2), (9, 3), (2, 3), (1, 2), (1, 1, 1, 1),
-        (1, 4, 1), (1, 2, 2, 2), (1, 1, 1, 1, 1,
-                                  1, 2), (2, 1, 1, 2, 1, 1), (3, 4, 3, 1)
-    )
-)
 
 solve(clues)
