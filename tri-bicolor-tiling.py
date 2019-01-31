@@ -63,7 +63,7 @@ def insane_multicolor_tiling(n, lengths):
     print(m)
     out = (m ** n)
     print(out)
-    return (m ** n)[0, 0]
+    return out[0, 0]
 
 
 class Modular:
