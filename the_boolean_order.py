@@ -19,6 +19,7 @@ def solve(s, ops):
                 for v, n in enumerate(evaluate(s[:i+1], ops[:i])):
                     for w, m in enumerate(evaluate(s[i+1:], ops[i+1:])):
                         c[FUNCS[ops[i]](v, w)] += n*m
+        print(c)
         return c
 
     return evaluate(s, ops)
