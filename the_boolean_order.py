@@ -12,6 +12,7 @@ def solve(s, ops):
     @lru_cache(None)
     def evaluate(s, ops):
         c = [0, 0]
+        print(s, ops)
         if not ops:
             c[s == 't'] += 1
         else:
