@@ -14,43 +14,35 @@ class Image:
         return s[0]*self.width + s[1]
 
     def where_pixels(self, colour):
-        pixels = set()
+        pixels = dict()
         for j, p in enumerate(self.pixels):
             if p == colour:
-                pixels.add(self.idx2sub(j))
+                pixels[self.idx2sub(j)] = 99999999999999999999
         return pixels
 
     def central_pixels(self, colour):
         pixels = self.where_pixels(colour)
+        # print(pixels)
 
-        def shrink(pixels, edges=None):
-            new_pixels = set()
-            new_edges = set()
-            if edges is None:
-                for p in pixels:
-                    if (p[0]-1, p[1]) in pixels and (p[0]+1, p[1]) in pixels and (p[0], p[1]-1) in pixels and (p[0], p[1]+1) in pixels:
-                        new_pixels.add(p)
-                    else:
-                        new_edges.add(p)
-            else:
-                new_pixels = pixels.copy()
-                for e in edges:
-                    for ee in [(e[0]-1, e[1]), (e[0]+1, e[1]), (e[0], e[1]-1), (e[0], e[1]+1)]:
-                        if ee in pixels:
-                            new_edges.add(ee)
-                            if ee in new_pixels:
-                                new_pixels.remove(ee)
-            return new_pixels, new_edges
+        def neighbors(s):
+            return [(s[0]-1, s[1]), (s[0]+1, s[1]), (s[0], s[1]-1), (s[0], s[1]+1)]
 
-        edges = None
-        while pixels:
-            new_pixels, new_edges = shrink(pixels, edges)
-            if not new_pixels:
-                break
-            pixels, edges = new_pixels, new_edges
+        for k in pixels.keys():
+            if any(pixels.get(e, -1) == -1 for e in neighbors(k)):
+                pixels[k] = 1
+        # print(pixels)
 
-        return [self.sub2idx(s) for s in pixels]
-        return 0
+        # for j in range(1):
+        while 99999999999999999999 in pixels.values():
+            for s in [e[0] for e in pixels.items() if e[1] == min(pixels.values())]:
+                for n in neighbors(s):
+                    if n in pixels.keys():
+                        pixels[n] = min(pixels[n], pixels[s]+1)
+            for s in [e[0] for e in pixels.items() if e[1] == min(pixels.values())]:
+                pixels.pop(s)
+        # print(pixels)
+
+        return [self.sub2idx(s) for s in pixels.keys()]
 
 
 image = Image([1, 1, 4, 4, 4, 4, 2, 2, 2, 2,
