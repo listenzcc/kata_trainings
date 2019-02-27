@@ -44,6 +44,28 @@ class Image:
 
         return [self.sub2idx(s) for s in pixels.keys()]
 
+    def central_pixels_fast(self, colour):
+        size = self.width * self.height
+        depths = [0] * size
+        internal = []
+        for position, pcolour in enumerate(self.pixels):
+            if pcolour == colour:
+                depths[position] = 1
+                if (position > self.width and
+                    position < size - self.width and
+                    position % self.width and
+                        (position + 1) % self.width):
+                    internal.append(position)
+                    depths[position] += min(depths[position - 1],
+                                            depths[position - self.width])
+        max_depth = 1
+        for position in internal[::-1]:
+            depths[position] = min(depths[position],
+                                   depths[position + 1] + 1,
+                                   depths[position + self.width] + 1)
+            max_depth = max(depths[position], max_depth)
+        return [position for position, depth in enumerate(depths) if depth == max_depth]
+
 
 image = Image([1, 1, 4, 4, 4, 4, 2, 2, 2, 2,
                1, 1, 1, 1, 2, 2, 2, 2, 2, 2,
