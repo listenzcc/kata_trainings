@@ -26,7 +26,9 @@ class SlidePuzzle():
             p = self.check()
 
         for p in [(self.sz[0]-2, j) for j in range(self.sz[1]-2)]:
+            print('_:', p)
             self.move(self.gt[p], p)
+            self.goto((self.sz[0]-1, self.sz[1]-1))
             if self.gt[(p[0]+1, p[1])] == self.get((p[0]+1, p[1])):
                 continue
             self.move(self.gt[(p[0]+1, p[1])], (p[0], p[1]+1))
@@ -41,7 +43,7 @@ class SlidePuzzle():
             self.right()
             if not self.check():
                 print('done.')
-                return
+                return self.path
 
         for j in range(4):
             self.left()
@@ -50,12 +52,12 @@ class SlidePuzzle():
             self.down()
             if not self.check():
                 print('done.')
-                return
+                return self.path
 
         return
 
     def move_v3(self, c):
-        print('settling:',
+        print('settling:_',
               self.get((self.sz[0]-2, 0)), self.get((self.sz[0]-2, 1)))
 
         # move blank to x's down
@@ -213,6 +215,7 @@ class SlidePuzzle():
 
     def step(self, dr):
         p_ = (self.p[0]+dr[0], self.p[1]+dr[1])
+        self.path.append(self.get(p_))
         self.set(self.p, self.get(p_))
         self.set(p_, 0)
         self.p = p_
@@ -247,6 +250,7 @@ puzzle4 = [
     [2, 13, 7, 15],
     [14, 9, 12, 11]
 ]
+puzzle41 = [[2, 0, 11, 6], [1, 15, 5, 4], [13, 10, 3, 12], [14, 9, 7, 8]]
 puzzle5 = [
     [3, 7, 14, 15, 10],
     [1, 0, 5, 9, 4],
@@ -262,5 +266,5 @@ simpleExample = [
     [13, 14, 15, 12]
 ]
 
-sp = SlidePuzzle(puzzle4)
-sp.solve()
+sp = SlidePuzzle(puzzle41)
+s = sp.solve()
