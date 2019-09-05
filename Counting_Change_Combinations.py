@@ -17,6 +17,16 @@ Your function should take an amount to change and an array of unique denominatio
 '''
 
 
+def count_change_good(money, coins):
+    if money < 0:
+        return 0
+    if money == 0:
+        return 1
+    if money > 0 and not coins:
+        return 0
+    return count_change(money-coins[-1], coins) + count_change(money, coins[:-1])
+
+
 def count_change(money, coins):
     # your implementation here
     coins.sort(reverse=True)
