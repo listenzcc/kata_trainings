@@ -83,6 +83,15 @@ def cut_log1(p, n):
     return solutions[n]
 
 
+def cut_log_slow(p, n):
+    if (n == 0):
+        return 0
+    q = -1
+    for i in range(1, n+1):
+        q = max(q, p[i] + cut_log_slow(p, n-i))
+    return q
+
+
 for n in [5, 8, 10, 22, 50]:
     print('-' * 80)
 
@@ -98,4 +107,14 @@ for n in [5, 8, 10, 22, 50]:
     print(cut_log1(p, n))
     for j in range(100):
         cut_log1(p, n)
+    print(time.time() - t)
+
+    if n > 20:
+        continue
+    # run and timming cut_log_slow,
+    # it is really slow.
+    t = time.time()
+    print(cut_log_slow(p, n))
+    for j in range(100):
+        cut_log_slow(p, n)
     print(time.time() - t)
