@@ -58,6 +58,8 @@ def knights_tour(start, size):
                    for m in legal_moves
                    if is_legal((pos[0]+m[0], pos[1]+m[1])))
 
+    remain = set((j, k) for j in range(size) for k in range(size))
+    remain.remove(start)
     past = [start]
     ss = size * size
 
