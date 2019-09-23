@@ -83,17 +83,14 @@ def knights_tour(start, size):
     _moves = [(-2, 1), (-2, -1), (-1, -2), (1, -2),
               (2, -1), (2, 1), (1, 2), (-1, 2)]
 
-    # _moves = [(-1, 0),
-    #           (1, 0),
-    #           (0, -1),
-    #           (0, 1)]
-
     _counter = {(j, k): 0 for j in range(size) for k in range(size)}
-    _steps = _counter.copy()
-    for j, k in _steps.keys():
-        _steps[(j, k)] = set((x, y) for x in range(size)
-                             for y in range(size) if (j-x, k-y) in _moves)
-        _counter[(j, k)] = len(_steps[(j, k)])
+
+    def genNeighs(pos): return ((pos[0]+dx, pos[1]+dy)
+                                for dx, dy in _moves
+                                if (pos[0]+dx, pos[1]+dy) in _counter)
+
+    for pos in _counter.keys():
+        _counter[pos] = len([e for e in genNeighs(pos)])
 
     path = []
 
@@ -108,11 +105,10 @@ def knights_tour(start, size):
         n = _counter.pop(pos)
         if not _counter:
             return True
-        subs = [e for e in _steps[pos] if e in _counter.keys()]
+        subs = [e for e in genNeighs(pos)]
         for e in subs:
             _counter[e] -= 1
 
-        # _steps[pos] if e in _counter.keys()):
         for _, s in sorted((_counter[e], e) for e in subs):
             if travel(s):
                 return True
@@ -167,14 +163,14 @@ def knights_tour_fast(start, size):
 
 repeat = 300
 
-size = 6
+size = 8
 
 t = time.time()
 for start in ((0, 0), (2, 2), (5, 5)):
     past, total = knights_tour_fast(start, size)
     print(past, total)
     for j in range(repeat):
-        knights_tour(start, size)
+        knights_tour_fast(start, size)
 
 print(time.time() - t)
 
@@ -183,6 +179,6 @@ for start in ((0, 0), (2, 2), (5, 5)):
     past, total = knights_tour(start, size)
     print(past, total)
     for j in range(repeat):
-        knights_tour_fast(start, size)
+        knights_tour(start, size)
 
 print(time.time() - t)
