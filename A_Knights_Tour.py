@@ -112,6 +112,9 @@ def knights_tour(start, size):
         for _, s in sorted((_counter[e], e) for e in subs):
             if travel(s):
                 return True
+        # any is slower, can not know why
+        # if any([travel(s) for _, s in sorted((_counter[e], e) for e in subs)]):
+        #     return True
 
         for e in subs:
             _counter[e] += 1
