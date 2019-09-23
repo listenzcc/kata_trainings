@@ -89,7 +89,6 @@ def knights_tour(start, size):
     #           (0, 1)]
 
     _counter = {(j, k): 0 for j in range(size) for k in range(size)}
-
     _steps = _counter.copy()
     for j, k in _steps.keys():
         _steps[(j, k)] = set((x, y) for x in range(size)
@@ -97,7 +96,6 @@ def knights_tour(start, size):
         _counter[(j, k)] = len(_steps[(j, k)])
 
     path = []
-    ss = size * size
 
     total = [0]
 
@@ -107,26 +105,22 @@ def knights_tour(start, size):
             return False
 
         path.append(pos)
-        if len(path) == ss:
+        n = _counter.pop(pos)
+        if not _counter:
             return True
+        subs = [e for e in _steps[pos] if e in _counter.keys()]
+        for e in subs:
+            _counter[e] -= 1
 
-        for n in _steps[pos]:
-            _counter[n] -= 1
-
-        # if any([travel(s) for s in sorted(_steps[pos], key=lambda e: _counter[e]) if not s in path]):
-        #     return True
-
-        xx = [e for e in _steps[pos] if e not in path]
-        # for s in sorted(xx, key=lambda e: _counter[e]):
-        for _, s in sorted((_counter[e], e) for e in xx):
-            if s in path:
-                continue
+        # _steps[pos] if e in _counter.keys()):
+        for _, s in sorted((_counter[e], e) for e in subs):
             if travel(s):
                 return True
 
+        for e in subs:
+            _counter[e] += 1
+        _counter[pos] = n
         path.pop()
-        for n in _steps[pos]:
-            _counter[n] += 1
 
         return False
 
@@ -173,11 +167,11 @@ def knights_tour_fast(start, size):
 
 repeat = 300
 
-size = 8
+size = 6
 
 t = time.time()
 for start in ((0, 0), (2, 2), (5, 5)):
-    past, total = knights_tour(start, size)
+    past, total = knights_tour_fast(start, size)
     print(past, total)
     for j in range(repeat):
         knights_tour(start, size)
@@ -186,7 +180,7 @@ print(time.time() - t)
 
 t = time.time()
 for start in ((0, 0), (2, 2), (5, 5)):
-    past, total = knights_tour_fast(start, size)
+    past, total = knights_tour(start, size)
     print(past, total)
     for j in range(repeat):
         knights_tour_fast(start, size)
