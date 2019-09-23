@@ -80,14 +80,8 @@ def knights_tour_slow(start, size):
 
 def knights_tour(start, size):
 
-    _moves = [(-1, 2),
-              (-1, -2),
-              (1, 2),
-              (1, -2),
-              (2, 1),
-              (2, -1),
-              (-2, 1),
-              (-2, -1)]
+    _moves = [(-2, 1), (-2, -1), (-1, -2), (1, -2),
+              (2, -1), (2, 1), (1, 2), (-1, 2)]
 
     # _moves = [(-1, 0),
     #           (1, 0),
@@ -95,7 +89,6 @@ def knights_tour(start, size):
     #           (0, 1)]
 
     _counter = {(j, k): 0 for j in range(size) for k in range(size)}
-    _passed = {(j, k): False for j in range(size) for k in range(size)}
 
     _steps = _counter.copy()
     for j, k in _steps.keys():
@@ -106,24 +99,32 @@ def knights_tour(start, size):
     path = []
     ss = size * size
 
+    total = [0]
+
     def travel(pos):
-        if len(path) == ss:
-            return True
-        # if pos in path:
-        #     return False
-        if _passed[pos]:
+        total[0] += 1
+        if pos in path:
             return False
 
         path.append(pos)
-        _passed[pos] = True
+        if len(path) == ss:
+            return True
+
         for n in _steps[pos]:
             _counter[n] -= 1
 
-        if any([travel(s) for s in sorted(_steps[pos], key=lambda e: _counter[e])]):
-            return True
+        # if any([travel(s) for s in sorted(_steps[pos], key=lambda e: _counter[e]) if not s in path]):
+        #     return True
+
+        xx = [e for e in _steps[pos] if e not in path]
+        # for s in sorted(xx, key=lambda e: _counter[e]):
+        for _, s in sorted((_counter[e], e) for e in xx):
+            if s in path:
+                continue
+            if travel(s):
+                return True
 
         path.pop()
-        _passed[pos] = False
         for n in _steps[pos]:
             _counter[n] += 1
 
@@ -131,7 +132,7 @@ def knights_tour(start, size):
 
     travel(start)
 
-    return path
+    return path, total[0]
 
 
 def knights_tour_fast(start, size):
@@ -142,7 +143,10 @@ def knights_tour_fast(start, size):
     def genNeighs(pos): return ((pos[0]+dx, pos[1]+dy)
                                 for dx, dy in MOVES if (pos[0]+dx, pos[1]+dy) in Warnsdorf_DP)
 
+    total = [0]
+
     def travel(pos):
+        total[0] += 1
         neighs = sorted((Warnsdorf_DP[n], n) for n in genNeighs(pos))
         for nSubNeighs, neigh in neighs:
             del Warnsdorf_DP[neigh]
@@ -164,23 +168,27 @@ def knights_tour_fast(start, size):
         Warnsdorf_DP[pos] = sum(1 for _ in genNeighs(pos))
     travel(start)
 
-    return path
+    return path, total[0]
 
 
-size = 6
+repeat = 300
+
+size = 8
+
 t = time.time()
 for start in ((0, 0), (2, 2), (5, 5)):
-    print('-' * 80)
-    print(start, size)
-    past = knights_tour(start, size)
-    print(past)
+    past, total = knights_tour(start, size)
+    print(past, total)
+    for j in range(repeat):
+        knights_tour(start, size)
+
 print(time.time() - t)
 
-
 t = time.time()
 for start in ((0, 0), (2, 2), (5, 5)):
-    print('-' * 80)
-    print(start, size)
-    past = knights_tour_fast(start, size)
-    print(past)
+    past, total = knights_tour_fast(start, size)
+    print(past, total)
+    for j in range(repeat):
+        knights_tour_fast(start, size)
+
 print(time.time() - t)
