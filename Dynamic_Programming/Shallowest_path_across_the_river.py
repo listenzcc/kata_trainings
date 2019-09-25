@@ -19,6 +19,7 @@ If you study these numbers, you'll see that there is a path accross the river (f
 
 Your job is to write a function shallowest_path(river) that takes a list of lists of positive ints (or array of arrays, depending on language) showing the depths of the river as shown in the example above and returns a shallowest path (i.e., the maximum depth is minimal) as a list of coordinate pairs (represented as tuples, Pairs, or arrays, depending on language) as described above. If there are several paths that are equally shallow, the function shall return a shortest such path. All depths are given as positive integers.'''
 
+import time
 from pprint import pprint
 
 
@@ -45,87 +46,81 @@ def shallowest_path(river):
                 for dx, dy in move
                 if pos[1]+dy > 0
                 if (pos[0]+dx, pos[1]+dy) in river_depth
-                if (pos[0]+dx, pos[1]+dy) not in dp_map)
+                if (pos[0]+dx, pos[1]+dy) not in passed)
 
-    min_depth = [1e5]
+    good_path = []
+    min_depth = 1e5
 
-    def travel(start):
-        for _ in range(1000):
-            edge = dict()
-            for pos, value in dp_map.items():
-                for neigh in genNeigh(pos):
-                    depth_neigh = max(value[1], river_depth[neigh])
-                    idx = depth_neigh*1000 + dp_map[pos][2]*100 - neigh[1]
-                    if neigh in edge:
-                        if edge[neigh][2] > idx:
-                            edge[neigh] = [pos, depth_neigh, idx]
-                        else:
-                            pass
-                    else:
-                        edge[neigh] = [pos, depth_neigh, idx]
+    for start in [e for e in river_depth if e[1] == 0]:
+        # print('-' * 80)
+        # print('starts', start)
+        passed = {start: (None, river_depth[start], 1)}
+        surround = {}
+        for e in genNeigh(start):
+            pos, dep, length = start, max(
+                river_depth[start], river_depth[e]), 2
+            surround[e] = (pos, dep, length, dep*1000+length*10-pos[1])
 
-            shallow = sorted((
-                # 0 order
-                edge[neigh][2],
-                # 1 depth of neigh
-                edge[neigh][1],
-                # 2 postion of edge
-                neigh,
-                # 3 position of pos
-                edge[neigh][0])
-                for neigh in edge)
-
-            shallow = shallow[0]
-
-            dp_map[shallow[2]] = (shallow[3], shallow[1],
-                                  dp_map[shallow[3]][2]+1)
-
-            # Too deep yet
-            if shallow[1] > min_depth[0]:
+        while surround:
+            forward = sorted(surround.items(), key=lambda x: x[1][3])[0]
+            if forward[1][1] > min_depth:
                 break
 
-            # Reach right
-            if shallow[2][1] == len(river[0]) - 1:
-                min_depth[0] = shallow[1]
-                path.append((dp_map, min_depth[0]))
+            passed[forward[0]] = forward[1]
+            # print('\n   add', forward[0], forward[1])
+            # pprint(passed)
+            for e in genNeigh(forward[0]):
+                pos = forward[0]
+                dep = max(passed[forward[0]][1], river_depth[e])
+                length = surround[forward[0]][2] + 1
+                order = dep*1000+length*10-pos[1]
+                if e in surround:
+                    if surround[e][3] > order:
+                        surround[e] = (pos, dep, length, order)
+                else:
+                    surround[e] = (pos, dep, length, order)
+
+            del surround[forward[0]]
+
+            if forward[0][1] == len(river[0])-1:
+                min_depth = min(passed[forward[0]][1], min_depth)
+                good_path.append([min_depth, forward[0], passed])
                 break
 
-    path = []
-    for j in range(len(river)):
-        start = (j, 0)
-        if not start == (4, 0):
-            continue
-        dp_map = {start: (None, river_depth[start], 1)}
-        travel(start)
+        # pprint(passed)
 
-    shallow_path = [e[0] for e in path if e[1] == min_depth[0]]
+    # print('summary')
+    # pprint(good_path)
 
-    min_length = 1000000
-    for e in shallow_path:
-        pos = [x for x in e if x[1] == len(river[0])-1][0]
-        pp = [pos]
-        while True:
-            pos = e[pos][0]
-            pp.append(pos)
-            if pos[1] == 0:
-                break
-        pp.reverse()
-        if len(pp) < min_length:
-            min_pp = pp
-            min_length = len(pp)
+    shallow_path = []
+    for e in good_path:
+        if e[0] == min_depth:
+            x = e[1]
+            _path = [x]
+            while True:
+                x = e[2][x][0]
+                _path.append(x)
+                if x[1] == 0:
+                    break
+            _path.reverse()
+            shallow_path.append(_path)
 
-    return min_pp
+    # pprint(shallow_path)
+
+    out = sorted(shallow_path, key=lambda x: len(x))[0]
+
+    return out
 
 
-river = [[8, 8, 8, 8],
-         [8, 8, 8, 8],
-         [8, 8, 8, 8],
-         [1, 1, 1, 8],
-         [1, 8, 1, 8],
-         [1, 8, 1, 8],
-         [1, 8, 1, 8],
-         [8, 8, 1, 8],
-         [8, 8, 1, 1]]
+river = [[2, 3, 2],
+         [1, 1, 4],
+         [9, 5, 2],
+         [1, 4, 4],
+         [1, 5, 4],
+         [2, 1, 4],
+         [5, 1, 2],
+         [5, 5, 5],
+         [8, 1, 9]]
 
 river = [[8, 8, 8, 1, 8, 8, 1, 1, 1, 8],
          [8, 8, 8, 1, 1, 8, 1, 1, 8, 8],
@@ -138,14 +133,18 @@ river = [[8, 8, 8, 1, 8, 8, 1, 1, 1, 8],
          [8, 1, 8, 8, 1, 1, 1, 8, 1, 1],
          [1, 1, 1, 8, 1, 1, 8, 8, 8, 1]]
 
-rive = [[2, 3, 2],
-        [1, 1, 4],
-        [9, 5, 2],
-        [1, 4, 4],
-        [1, 5, 4],
-        [2, 1, 4],
-        [5, 1, 2],
-        [5, 5, 5],
-        [8, 1, 9]]
+river1 = [[1, 8, 8],
+          [8, 8, 8],
+          [8, 8, 1],
+          [8, 8, 1],
+          [8, 1, 8],
+          [8, 8, 1],
+          [1, 1, 8],
+          [8, 8, 1],
+          [8, 8, 8]]
 
+t = time.time()
 pprint(shallowest_path(river))
+for _ in range(500):
+    shallowest_path(river)
+print(time.time()-t)
