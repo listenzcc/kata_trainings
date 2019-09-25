@@ -65,7 +65,13 @@ def shallowest_path(river):
             surround[e] = (pos, dep, length, dep*1000+length)
 
         while surround:
-            forward = sorted(surround.items(), key=lambda x: x[1][3])[0]
+            tmp = 1e5
+            for a, b in surround.items():
+                if tmp > b[3]:
+                    tmp = b[3]
+                    forward = (a, b)
+            # forward1 = sorted(surround.items(), key=lambda x: x[1][3])[0]
+            # __import__("pdb").set_trace()
 
             if forward[1][3] >= min_order:
                 break
@@ -91,11 +97,12 @@ def shallowest_path(river):
                 min_order = min(forward[1][3], min_order)
                 good_path = [forward[0], passed]
                 break
+        # break
 
         # pprint(passed)
 
-    print('summary')
-    pprint(good_path)
+    # print('summary')
+    # pprint(good_path)
 
     x = good_path[0]
     out = [x]
@@ -108,15 +115,24 @@ def shallowest_path(river):
     return out
 
 
-river = [[2, 3, 2],
-         [1, 1, 4],
-         [9, 5, 2],
-         [1, 4, 4],
-         [1, 5, 4],
-         [2, 1, 4],
-         [5, 1, 2],
-         [5, 5, 5],
-         [8, 1, 9]]
+def shallowest_path_1(river):
+    depth = {(r, c): d for r, row in enumerate(river)
+             for c, d in enumerate(row)}
+    width = max(c for _, c in depth)
+
+    for mx in sorted(set(depth.values())):
+        D = {d for d in depth if depth[d] <= mx}
+        paths, D = [[d] for d in D if d[1] == 0], {d for d in D if d[1]}
+
+        while paths:
+            newp = []
+            for p in paths:
+                if p[-1][1] == width:
+                    return p
+                for d in {(p[-1][0]+rr, p[-1][1]+cc) for rr in [-1, 0, 1] for cc in [-1, 0, 1]} & D:
+                    newp, _ = newp + [p + [d]], D.discard(d)
+            paths = newp
+
 
 river = [[8, 8, 8, 1, 8, 8, 1, 1, 1, 8],
          [8, 8, 8, 1, 1, 8, 1, 1, 8, 8],
@@ -129,18 +145,14 @@ river = [[8, 8, 8, 1, 8, 8, 1, 1, 1, 8],
          [8, 1, 8, 8, 1, 1, 1, 8, 1, 1],
          [1, 1, 1, 8, 1, 1, 8, 8, 8, 1]]
 
-river1 = [[1, 8, 8],
-          [8, 8, 8],
-          [8, 8, 1],
-          [8, 8, 1],
-          [8, 1, 8],
-          [8, 8, 1],
-          [1, 1, 8],
-          [8, 8, 1],
-          [8, 8, 8]]
+t = time.time()
+pprint(shallowest_path(river))
+for _ in range(500):
+    shallowest_path(river)
+print(time.time()-t)
 
 t = time.time()
 pprint(shallowest_path(river))
-# for _ in range(500):
-#     shallowest_path(river)
+for _ in range(500):
+    shallowest_path_1(river)
 print(time.time()-t)
