@@ -48,32 +48,37 @@ def shallowest_path(river):
                 if (pos[0]+dx, pos[1]+dy) in river_depth
                 if (pos[0]+dx, pos[1]+dy) not in passed)
 
-    good_path = []
-    min_depth = 1e5
+    min_order = 1e5
 
-    for start in [e for e in river_depth if e[1] == 0]:
+    starts = sorted([e for e in river_depth if e[1] == 0],
+                    key=lambda x: river_depth[x])
+
+    for start in starts:
         # print('-' * 80)
         # print('starts', start)
         passed = {start: (None, river_depth[start], 1)}
         surround = {}
+        pos = start  # last node
+        length = 2   # length of steps
         for e in genNeigh(start):
-            pos, dep, length = start, max(
-                river_depth[start], river_depth[e]), 2
-            surround[e] = (pos, dep, length, dep*1000+length*10-pos[1])
+            dep = max(river_depth[start], river_depth[e])
+            surround[e] = (pos, dep, length, dep*1000+length)
 
         while surround:
             forward = sorted(surround.items(), key=lambda x: x[1][3])[0]
-            if forward[1][1] > min_depth:
+
+            if forward[1][3] >= min_order:
                 break
 
             passed[forward[0]] = forward[1]
+
             # print('\n   add', forward[0], forward[1])
             # pprint(passed)
+            pos = forward[0]  # last node
+            length = forward[1][2] + 1  # length of steps
             for e in genNeigh(forward[0]):
-                pos = forward[0]
                 dep = max(passed[forward[0]][1], river_depth[e])
-                length = surround[forward[0]][2] + 1
-                order = dep*1000+length*10-pos[1]
+                order = dep*1000+length
                 if e in surround:
                     if surround[e][3] > order:
                         surround[e] = (pos, dep, length, order)
@@ -83,32 +88,23 @@ def shallowest_path(river):
             del surround[forward[0]]
 
             if forward[0][1] == len(river[0])-1:
-                min_depth = min(passed[forward[0]][1], min_depth)
-                good_path.append([min_depth, forward[0], passed])
+                min_order = min(forward[1][3], min_order)
+                good_path = [forward[0], passed]
                 break
 
         # pprint(passed)
 
-    # print('summary')
-    # pprint(good_path)
+    print('summary')
+    pprint(good_path)
 
-    shallow_path = []
-    for e in good_path:
-        if e[0] == min_depth:
-            x = e[1]
-            _path = [x]
-            while True:
-                x = e[2][x][0]
-                _path.append(x)
-                if x[1] == 0:
-                    break
-            _path.reverse()
-            shallow_path.append(_path)
-
-    # pprint(shallow_path)
-
-    out = sorted(shallow_path, key=lambda x: len(x))[0]
-
+    x = good_path[0]
+    out = [x]
+    while True:
+        x = good_path[1][x][0]
+        out.append(x)
+        if x[1] == 0:
+            break
+    out.reverse()
     return out
 
 
@@ -145,6 +141,6 @@ river1 = [[1, 8, 8],
 
 t = time.time()
 pprint(shallowest_path(river))
-for _ in range(500):
-    shallowest_path(river)
+# for _ in range(500):
+#     shallowest_path(river)
 print(time.time()-t)
