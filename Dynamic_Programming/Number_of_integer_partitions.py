@@ -33,6 +33,10 @@ def partitions(n):
             else:
                 # For others, add its left hand plus
                 # max number of partitions with elements are not larger than k
+                # max(dp[j-k-1][:k+1])
+                # j-k-1 equals to j-(k+1)
+                # means from jth row down on k rows, -1 is because k starts on 0
+                # :k+1 means selecting the first k elements on this row
                 dp[j][k] += dp[j][k-1] + max(dp[j-k-1][:k+1])
 
     # Print the DP matrix
